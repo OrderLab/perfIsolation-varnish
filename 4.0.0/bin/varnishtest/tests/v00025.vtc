@@ -1,0 +1,51 @@
+varnishtest "More VCL coverage"
+
+server s1 {
+	rxreq
+	txresp
+} -start
+
+varnish v1 -vcl+backend {
+
+	import ${vmod_std};
+
+	sub vcl_deliver {
+		set resp.http.server_port = std.port(server.ip);
+	}
+
+	sub vcl_backend_response {
+		set beresp.http.backend = bereq.backend;
+		if (beresp.ttl > 3 s) {
+			set beresp.http.ttl = "long";
+		} else {
+			set beresp.http.ttl = "short";
+		}
+	}
+
+	sub vcl_hit {
+		if (obj.grace < 3m) {
+			return (deliver);
+		}
+		if (obj.ttl < 3m) {
+			return (deliver);
+		}
+	}
+
+	sub vcl_backend_fetch {
+		if (bereq.between_bytes_timeout < 10s) {
+			set bereq.http.quick = "please";
+		}
+		if (bereq.connect_timeout < 10s) {
+			set bereq.http.hello = "please";
+		}
+		set bereq.connect_timeout = 10s;
+	}
+
+} -start
+
+client c1 {
+	txreq
+	rxresp
+	txreq
+	rxresp
+} -run
