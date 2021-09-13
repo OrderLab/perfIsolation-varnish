@@ -59,7 +59,7 @@
 #include "vrnd.h"
 #include "vsha256.h"
 #include "vtim.h"
-
+#include "psandbox.h"
 #include "compat/daemon.h"
 
 struct heritage		heritage;

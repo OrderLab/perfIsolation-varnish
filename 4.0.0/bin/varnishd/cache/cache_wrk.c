@@ -37,7 +37,7 @@
 #include "cache.h"
 
 #include "hash/hash_slinger.h"
-
+#include "psandbox.h"
 static struct lock		wstat_mtx;
 
 /*--------------------------------------------------------------------*/
@@ -128,7 +128,7 @@ wrk_thread_real(void *priv, unsigned thread_workspace)
 {
 	struct worker *w, ww;
 	unsigned char ws[thread_workspace];
-
+	PSandbox *psandbox;
 	THR_SetName("cache-worker");
 	w = &ww;
 	memset(w, 0, sizeof *w);
@@ -139,8 +139,9 @@ wrk_thread_real(void *priv, unsigned thread_workspace)
 	WS_Init(w->aws, "wrk", ws, thread_workspace);
 
 	VSL(SLT_WorkThread, 0, "%p start", w);
-
+	psandbox = create_psandbox();
 	Pool_Work_Thread(priv, w);
+	release_psandbox(psandbox);
 	AZ(w->pool);
 
 	VSL(SLT_WorkThread, 0, "%p end", w);

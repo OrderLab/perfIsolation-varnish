@@ -50,7 +50,7 @@
 #include "vsa.h"
 #include "vtcp.h"
 #include "vtim.h"
-
+#include "psandbox.h"
 /*--------------------------------------------------------------------*/
 
 struct sesspool {
@@ -103,14 +103,17 @@ static void
 ses_req_pool_task(struct worker *wrk, void *arg)
 {
 	struct req *req;
-
+  PSandbox *psandbox;
 	CHECK_OBJ_NOTNULL(wrk, WORKER_MAGIC);
 	CAST_OBJ_NOTNULL(req, arg, REQ_MAGIC);
 
 	THR_SetRequest(req);
 	AZ(wrk->aws->r);
 	wrk->lastused = NAN;
+	psandbox = get_current_psandbox();
+	active_psandbox(psandbox);
 	HTTP1_Session(wrk, req);
+	freeze_psandbox(psandbox);
 	WS_Assert(wrk->aws);
 	AZ(wrk->wrw);
 	if (DO_DEBUG(DBG_VCLREL) && wrk->vcl != NULL)

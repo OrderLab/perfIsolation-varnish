@@ -44,8 +44,15 @@ AC_PROG_CPP
 
 AX_PTHREAD(,[AC_MSG_ERROR([Could not configure pthreads support])])
 
-LIBS="$PTHREAD_LIBS $LIBS"
-CFLAGS="$CFLAGS $PTHREAD_CFLAGS"
+if ${PSANDBOXDIR}; then
+ echo "PSANDBOXDIR environment variable is not set, building PostgreSQL without psandbox."
+else
+ PSANDBOXSRC_INCLUDE="${PSANDBOXDIR}/libs/include"
+ PSANDBOXSRC_LIB="${PSANDBOXDIR}/build/libs/"
+fi
+
+LIBS="$PTHREAD_LIBS $LIBS -L${PSANDBOXSRC_LIB} -lpsandbox"
+CFLAGS="$CFLAGS $PTHREAD_CFLAGS -I${PSANDBOXSRC_INCLUDE}"
 CC="$PTHREAD_CC"
 
 AC_PROG_INSTALL
