@@ -109,7 +109,7 @@ http1_wait(struct sess *sp, struct worker *wrk, struct req *req)
 	assert(isnan(req->t_req));
 
 	tmo = (int)(1e3 * cache_param->timeout_linger);
-	update_psandbox((size_t)req,PREPARE);
+
 	while (1) {
 		pfd[0].fd = sp->fd;
 		pfd[0].events = POLLIN;
@@ -128,7 +128,7 @@ http1_wait(struct sess *sp, struct worker *wrk, struct req *req)
 			VSLb_ts_req(req, "Req", now);
 			req->t_req = req->t_prev;
 			req->acct.req_hdrbytes += Tlen(req->htc->rxbuf);
-			update_psandbox((size_t)req,ENTER);
+
 			return (REQ_FSM_MORE);
 		} else if (hs == HTTP1_ERROR_EOF) {
 			why = SC_REM_CLOSE;

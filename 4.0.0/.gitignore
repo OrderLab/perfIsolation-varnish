@@ -104,3 +104,4 @@ cscope.*out
 /bin/varnishtest/tests/*.log
 /bin/varnishtest/tests/*.log-t
 /bin/varnishtest/test-suite.log
+.idea/

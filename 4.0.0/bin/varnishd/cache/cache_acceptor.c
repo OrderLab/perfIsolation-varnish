@@ -46,6 +46,9 @@
 #include <sys/types.h>
 #include <netinet/in.h>
 #include <netinet/tcp.h>
+#include <psandbox.h>
+#include <stdio.h>
+#include <arpa/inet.h>
 
 #include "cache.h"
 #include "common/heritage.h"
@@ -269,6 +272,33 @@ vca_pace_good(void)
 	Lck_Unlock(&pace_mtx);
 }
 
+/******* PerfSandbox change *********************/
+int get_ip(struct sockaddr_storage *in, socklen_t len){
+  switch(in->ss_family) {
+    case AF_INET: {
+      if(len < sizeof(struct sockaddr_in)){
+        errno = EINVAL; // wrong size
+        return 0;
+      }
+      struct sockaddr_in *p = (struct sockaddr_in *) in;
+      return p->sin_addr.s_addr;
+    }
+    case AF_INET6: {
+        if(len < sizeof(struct sockaddr_in6)){
+          errno = EINVAL; // wrong size
+          return 0;
+        }
+        struct sockaddr_in6 *p = (struct sockaddr_in6 *) in;
+        return p->sin6_addr.s6_addr32[0];
+    }
+    default:
+      errno = EINVAL; // family not supported
+      return 0;
+    }
+
+}
+
+
 /*--------------------------------------------------------------------
  * Accept on a listen socket, and handle error returns.
  *
@@ -278,7 +308,8 @@ vca_pace_good(void)
 int
 VCA_Accept(struct listen_sock *ls, struct wrk_accept *wa)
 {
-	int i;
+	int i,ip;
+	PSandbox *psandbox;
 
 	CHECK_OBJ_NOTNULL(ls, LISTEN_SOCK_MAGIC);
 	vca_pace_check();
@@ -291,6 +322,16 @@ VCA_Accept(struct listen_sock *ls, struct wrk_accept *wa)
 		i = accept(ls->sock, (void*)&wa->acceptaddr,
 			   &wa->acceptaddrlen);
 	} while (i < 0 && errno == EAGAIN);
+	ip = get_ip(&wa->acceptaddr,wa->acceptaddrlen);
+	psandbox = get_psandbox(ip);
+	if (!psandbox) {
+      printf("create the psandbox %d for ip %d\n",psandbox->bid,ip);
+      psandbox = create_psandbox();
+	} else {
+	  printf("create the psandbox %d for ip %d\n",psandbox->bid,ip);
+	}
+	unbind_psandbox(ip,psandbox);
+
 
 	if (i < 0) {
 		switch (errno) {
