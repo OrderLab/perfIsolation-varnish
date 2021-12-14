@@ -128,7 +128,9 @@ wrk_thread_real(void *priv, unsigned thread_workspace)
 {
 	struct worker *w, ww;
 	unsigned char ws[thread_workspace];
-	PSandbox *psandbox;
+	// int psandbox;
+	// IsolationRule rule;
+
 	THR_SetName("cache-worker");
 	w = &ww;
 	memset(w, 0, sizeof *w);
@@ -139,9 +141,12 @@ wrk_thread_real(void *priv, unsigned thread_workspace)
 	WS_Init(w->aws, "wrk", ws, thread_workspace);
 
 	VSL(SLT_WorkThread, 0, "%p start", w);
-	psandbox = create_psandbox();
+	// rule.type = RELATIVE;
+	// rule.isolation_level = 50;
+	// rule.priority = 0;
+    // psandbox = create_psandbox(rule);
 	Pool_Work_Thread(priv, w);
-	release_psandbox(psandbox);
+	// release_psandbox(psandbox);
 	AZ(w->pool);
 
 	VSL(SLT_WorkThread, 0, "%p end", w);

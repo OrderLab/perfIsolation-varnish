@@ -273,7 +273,7 @@ vca_pace_good(void)
 }
 
 /******* PerfSandbox change *********************/
-int get_ip(struct sockaddr_storage *in, socklen_t len){
+size_t get_ip(struct sockaddr_storage *in, socklen_t len){
   switch(in->ss_family) {
     case AF_INET: {
       if(len < sizeof(struct sockaddr_in)){
@@ -288,8 +288,9 @@ int get_ip(struct sockaddr_storage *in, socklen_t len){
           errno = EINVAL; // wrong size
           return 0;
         }
-        struct sockaddr_in6 *p = (struct sockaddr_in6 *) in;
-        return p->sin6_addr.s6_addr32[0];
+        // struct sockaddr_in6 *p = (struct sockaddr_in6 *) in;
+        // return p->sin6_addr.s6_addr32[0];
+		return 0;
     }
     default:
       errno = EINVAL; // family not supported
@@ -308,8 +309,9 @@ int get_ip(struct sockaddr_storage *in, socklen_t len){
 int
 VCA_Accept(struct listen_sock *ls, struct wrk_accept *wa)
 {
-	int i,ip;
-	PSandbox *psandbox;
+	int i;//, psandbox;
+	// size_t ip;
+	// IsolationRule rule;
 
 	CHECK_OBJ_NOTNULL(ls, LISTEN_SOCK_MAGIC);
 	vca_pace_check();
@@ -322,15 +324,22 @@ VCA_Accept(struct listen_sock *ls, struct wrk_accept *wa)
 		i = accept(ls->sock, (void*)&wa->acceptaddr,
 			   &wa->acceptaddrlen);
 	} while (i < 0 && errno == EAGAIN);
-	ip = get_ip(&wa->acceptaddr,wa->acceptaddrlen);
-	psandbox = get_psandbox(ip);
-	if (!psandbox) {
-      printf("create the psandbox %d for ip %d\n",psandbox->bid,ip);
-      psandbox = create_psandbox();
-	} else {
-	  printf("create the psandbox %d for ip %d\n",psandbox->bid,ip);
-	}
-	unbind_psandbox(ip,psandbox);
+	// ip = (size_t)get_ip(&wa->acceptaddr,wa->acceptaddrlen);
+	// psandbox = get_psandbox(ip);
+	// if (ip == 0x9e7ba8c0)
+	// 	printf("IN Accept %lx\n", ip);
+	// if (psandbox == -1) {
+    // //   printf("create the psandbox %d for ip %ld\n",psandbox,ip);
+	//   rule.type = RELATIVE;
+	//   rule.isolation_level = 50;
+	//   rule.priority = 0;
+    //   psandbox = create_psandbox(rule);
+	//   unbind_psandbox(ip, psandbox, 0, 0);
+	// } else {
+	// //   psandbox = bind_psandbox(ip);
+	// //   printf("create the psandbox %d for ip %ld\n",psandbox,ip);
+	// }
+	// // unbind_psandbox(ip, psandbox, true, false);
 
 
 	if (i < 0) {

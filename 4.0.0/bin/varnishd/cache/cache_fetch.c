@@ -807,6 +807,7 @@ vbf_fetch_thread(struct worker *wrk, void *priv)
 /*--------------------------------------------------------------------
  */
 
+#include "vsa.h"
 void
 VBF_Fetch(struct worker *wrk, struct req *req, struct objcore *oc,
     struct object *oldobj, enum vbf_fetch_mode_e mode)
@@ -819,6 +820,7 @@ VBF_Fetch(struct worker *wrk, struct req *req, struct objcore *oc,
 	CHECK_OBJ_NOTNULL(oc, OBJCORE_MAGIC);
 	CHECK_OBJ_ORNULL(oldobj, OBJECT_MAGIC);
 
+	// size_t addr = VSA_Addr(sess_remote_addr(req->sp));
 	bo = VBO_GetBusyObj(wrk, req);
 	CHECK_OBJ_NOTNULL(bo, BUSYOBJ_MAGIC);
 	THR_SetBusyobj(bo);

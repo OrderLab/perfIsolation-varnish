@@ -43,6 +43,8 @@
 
 #include "vtim.h"
 
+#include "psandbox.h"
+
 VTAILQ_HEAD(taskhead, pool_task);
 
 struct poolsock {
@@ -169,6 +171,9 @@ pool_accept(struct worker *wrk, void *arg)
 		memcpy(wa2, wa, sizeof *wa);
 		wrk2->task.func = SES_pool_accept_task;
 		wrk2->task.priv = pp->sesspool;
+		//Psandbox changes
+		// unbind_psandbox((size_t)&wrk2->cond, 0, 0, 0);
+
 		AZ(pthread_cond_signal(&wrk2->cond));
 
 		/*
@@ -292,6 +297,11 @@ Pool_Work_Thread(void *priv, struct worker *wrk)
 			break;
 
 		assert(wrk->pool == pp);
+		// int psandbox = get_psandbox((size_t)&wrk->cond);
+		// if (psandbox != -1) {
+		// 	bind_psandbox((size_t)&wrk->cond); 
+		// }
+
 		tp->func(wrk, tp->priv);
 		stats_clean = WRK_TrySumStat(wrk);
 	}

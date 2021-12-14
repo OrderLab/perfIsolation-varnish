@@ -103,17 +103,33 @@ static void
 ses_req_pool_task(struct worker *wrk, void *arg)
 {
 	struct req *req;
-  PSandbox *psandbox;
+  	int psandbox;
+	IsolationRule rule;
+
 	CHECK_OBJ_NOTNULL(wrk, WORKER_MAGIC);
 	CAST_OBJ_NOTNULL(req, arg, REQ_MAGIC);
+
+	size_t addr = VSA_Addr(sess_remote_addr(req->sp));
 
 	THR_SetRequest(req);
 	AZ(wrk->aws->r);
 	wrk->lastused = NAN;
-	psandbox = get_current_psandbox();
-	active_psandbox(psandbox);
+
+	psandbox = get_psandbox(addr);
+	if (psandbox == -1) {
+		rule.type = RELATIVE;
+		rule.isolation_level = 50;
+		rule.priority = 0;
+    	psandbox = create_psandbox(rule);
+	} else {
+		psandbox = bind_psandbox(addr);
+	}
+
+	activate_psandbox(psandbox);
 	HTTP1_Session(wrk, req);
-	freeze_psandbox(psandbox);
+	// freeze_psandbox(psandbox);
+	unbind_psandbox(addr, 0, false, false);
+
 	WS_Assert(wrk->aws);
 	AZ(wrk->wrw);
 	if (DO_DEBUG(DBG_VCLREL) && wrk->vcl != NULL)

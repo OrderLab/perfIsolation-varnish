@@ -40,6 +40,8 @@
 
 #include "hash/hash_slinger.h"
 
+#include "psandbox.h"
+
 static struct mempool		*vbopool;
 
 /*--------------------------------------------------------------------
@@ -233,6 +235,7 @@ VBO_extend(struct busyobj *bo, ssize_t l)
 	st->len += l;
 	bo->fetch_obj->len += l;
 	AZ(pthread_cond_broadcast(&bo->cond));
+	do_update_psandbox((size_t)&bo->cond, UNHOLD, 1);
 	Lck_Unlock(&bo->mtx);
 }
 
@@ -267,10 +270,12 @@ void
 VBO_waitstate(struct busyobj *bo, enum busyobj_state_e want)
 {
 	Lck_Lock(&bo->mtx);
+	update_psandbox((size_t)&bo->cond, PREPARE);
 	while (1) {
 		if (bo->state >= want)
 			break;
 		(void)Lck_CondWait(&bo->cond, &bo->mtx, 0);
 	}
+	update_psandbox((size_t)&bo->cond, ENTER);
 	Lck_Unlock(&bo->mtx);
 }

@@ -337,3 +337,18 @@ VSA_Port(const struct suckaddr *sua)
 			return (0);
 	}
 }
+
+size_t
+VSA_Addr(const struct suckaddr *sua)
+{
+
+	CHECK_OBJ_NOTNULL(sua, SUCKADDR_MAGIC);
+	switch(sua->sa.sa_family) {
+		case PF_INET:
+			return (sua->sa4.sin_addr.s_addr);
+		case PF_INET6:
+			return (0);
+		default:
+			return (0);
+	}
+}
