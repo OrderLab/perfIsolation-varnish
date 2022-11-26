@@ -1,3 +1,4 @@
 .idea
 dist/
-
+varnish-4.0.0.tar.gz
+varnish-cache-varnish-4.0.0
