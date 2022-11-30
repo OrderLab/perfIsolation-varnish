@@ -128,7 +128,7 @@ ses_req_pool_task(struct worker *wrk, void *arg)
 	activate_psandbox(psandbox);
 	HTTP1_Session(wrk, req);
 	// freeze_psandbox(psandbox);
-	unbind_psandbox(addr, 0, false, false);
+	unbind_psandbox(addr, 0, UNBIND_HANDLE_ACCEPT);
 
 	WS_Assert(wrk->aws);
 	AZ(wrk->wrw);

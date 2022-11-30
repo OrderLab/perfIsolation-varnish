@@ -1,3 +1,3 @@
 #!/bin/bash
-truncate -s 3G 20G.bin
+truncate -s 5M 5M.bin
 

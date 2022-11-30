@@ -3,6 +3,7 @@
 mkdir -p dist
 cd 4.0.0
 
+./autogen.sh
 ./configure  --prefix=$(pwd)/../dist
 
 make -j4

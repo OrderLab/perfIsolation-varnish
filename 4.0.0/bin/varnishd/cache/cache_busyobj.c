@@ -235,7 +235,7 @@ VBO_extend(struct busyobj *bo, ssize_t l)
 	st->len += l;
 	bo->fetch_obj->len += l;
 	AZ(pthread_cond_broadcast(&bo->cond));
-	do_update_psandbox((size_t)&bo->cond, UNHOLD, 1);
+	do_update_psandbox((size_t)&bo->cond, UNHOLD, 1,0);
 	Lck_Unlock(&bo->mtx);
 }
 
