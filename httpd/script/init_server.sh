@@ -1,3 +1,3 @@
 #!/bin/bash
-truncate -s 5M 5M.bin
+truncate -s 500M 500M.bin
 
