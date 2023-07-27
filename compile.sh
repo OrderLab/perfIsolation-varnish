@@ -12,4 +12,6 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 make install
-
+cd ..
+echo "export PSANDBOX_VARNISH_DIR=`pwd`/dist" >> $HOME/.bashrc
+echo "export PATH=`pwd`/dist/bin:$PATH" >> $HOME/.bashrc
