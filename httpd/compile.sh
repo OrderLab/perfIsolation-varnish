@@ -34,4 +34,4 @@ make install
 
 cd ..
 ./script/init_server.sh
-mv 500M.bin dist/htdocs
+mv 10M.bin dist/htdocs
