@@ -13,21 +13,21 @@ mv apr-util-1.6.1 apr-util
 
 cd ..
 ./buildconf
-./configure  --prefix=$(pwd)/../dist --with-included-apr --with-mpm=prefork
+./configure  --prefix=$(pwd)/../dist --with-included-apr --enable-so --with-mpm=prefork
 
 make -j4
 if [ $? -ne 0 ]; then
-  echo "Failed to build memcached"
+  echo "Failed to build apache"
   exit 1
 fi
 make install
 cd ..
 cd php-7.4.23
 ./buildconf --force
-./configure  --prefix=$(pwd)/../dist/php
+./configure --with-apxs2=$(pwd)/../dist/bin/apxs --prefix=$(pwd)/../dist/php
 make -j4
 if [ $? -ne 0 ]; then
-    echo "Failed to build apache"
+    echo "Failed to build php"
     exit 1
 fi
 make install
