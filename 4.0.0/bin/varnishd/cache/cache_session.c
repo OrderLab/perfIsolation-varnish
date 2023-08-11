@@ -105,7 +105,7 @@ ses_req_pool_task(struct worker *wrk, void *arg)
 	struct req *req;
   	int psandbox;
 	IsolationRule rule;
-
+//	FILE* fp = fopen("output.log","a");
 	CHECK_OBJ_NOTNULL(wrk, WORKER_MAGIC);
 	CAST_OBJ_NOTNULL(req, arg, REQ_MAGIC);
 
@@ -115,20 +115,23 @@ ses_req_pool_task(struct worker *wrk, void *arg)
 	AZ(wrk->aws->r);
 	wrk->lastused = NAN;
 
-	psandbox = get_psandbox(addr);
+	psandbox = get_psandbox(addr+gettid());
+//	fprintf(fp,"psandbox %d\n",psandbox);
+//	fflush(fp);
 	if (psandbox == -1) {
 		rule.type = RELATIVE;
 		rule.isolation_level = 50;
 		rule.priority = 0;
     	psandbox = create_psandbox(rule);
 	} else {
-		psandbox = bind_psandbox(addr);
+		psandbox = bind_psandbox(addr+gettid());
 	}
 
 	activate_psandbox(psandbox);
 	HTTP1_Session(wrk, req);
 	// freeze_psandbox(psandbox);
-	unbind_psandbox(addr, 0, UNBIND_HANDLE_ACCEPT);
+//	fclose(fp);
+	unbind_psandbox(addr+gettid(), 0, UNBIND_HANDLE_ACCEPT);
 
 	WS_Assert(wrk->aws);
 	AZ(wrk->wrw);
